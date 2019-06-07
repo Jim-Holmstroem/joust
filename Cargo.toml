@@ -1,0 +1,7 @@
+[package]
+name = "joust"
+version = "0.1.0"
+authors = ["Jim Holmstrom <jim.holmstroem@gmail.com>"]
+edition = "2018"
+
+[dependencies]
