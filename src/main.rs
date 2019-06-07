@@ -1,8 +1,8 @@
-use std::process::{
-    Command,
-    Stdio,
-};
 use std::{
+    process::{
+        Command,
+        Stdio,
+    },
     io,
     io::{
         BufRead,
@@ -10,6 +10,12 @@ use std::{
         BufWriter,
         Write,
     },
+};
+
+extern crate tokio;
+
+use tokio::{
+    prelude::*,
 };
 
 struct Program {
@@ -53,23 +59,29 @@ impl Program {
     }
 
     fn act(&mut self, input: String) -> io::Result<String> {
-        println!("act({})", input);
         self.writer.write_all(input.as_bytes())?;
-        println!("wrote");
+        self.writer.flush()?;
 
         let mut output = String::new();
-        self.reader.read_line(&mut output)?;
-        println!("read");
+        let read = future::lazy(|| {
+            self.reader.read_line(&mut output);
+
+            future::ok::<_, ()>(())
+        });
+
+        tokio::run(read);
 
         Ok(output)
     }
 }
 
 fn main() -> Result<(), io::Error> {
-    let mut program = Program::new("./scripts/a.sh".to_string())?;
+    let mut p = Program::new("./scripts/a.sh".to_string())?;
 
     loop {
-        println!(".");
-        program.act("something new\n".to_string())?;
+        println!(
+            "{}",
+            p.act("something new\n".to_string())?,
+        );
     }
 }
