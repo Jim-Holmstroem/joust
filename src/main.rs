@@ -16,35 +16,6 @@ use std::{
     ffi,
 };
 
-fn run<S: AsRef<ffi::OsStr> + ?Sized>(
-    s: &S,
-) -> io::Result<Box<dyn Iterator<Item = String>>> {
-    let command = Command::new(s)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()?;
-
-    let mut stdin = command.stdin.unwrap();
-
-    let mut writer = BufWriter::new(&mut stdin);
-    writer.write_all("something\nsomething\n".as_bytes());
-
-    let stdout = command
-        .stdout
-        .ok_or_else(|| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                "Could not capture standard output."
-            )
-        })?;
-
-    Ok(Box::new(
-        BufReader::new(stdout)
-            .lines()
-            .filter_map(|l| l.ok())
-    ))
-}
-
 struct Program {
     reader: Box<dyn BufRead>,
     writer: Box<dyn Write>,
