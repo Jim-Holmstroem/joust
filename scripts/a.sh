@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 while read line
 do 
-    echo "a 1 2; b 3 4; $line"
-    sleep 1
+    echo "$line"
 done < "${1:-/dev/stdin}"

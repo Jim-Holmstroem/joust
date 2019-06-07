@@ -86,10 +86,13 @@ impl Program {
     }
 
     fn act(&mut self, input: String) -> io::Result<String> {
+        println!("act({})", input);
         self.writer.write_all(input.as_bytes());
+        println!("wrote");
 
         let mut output = String::new();
         self.reader.read_line(&mut output);
+        println!("read");
 
         Ok(output)
     }
