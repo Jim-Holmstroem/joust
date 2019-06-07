@@ -1,20 +1,40 @@
-use std::process::{Command, Stdio};
-use std::io::{BufRead, BufReader, Error, ErrorKind};
+use std::process::{
+    Command,
+    Stdio,
+};
+use std::{
+    io,
+    io::{
+        BufRead,
+        BufReader,
+        Read,
+    },
+    slice,
+    ffi,
+};
 
-fn main() -> Result<(), Error> {
-    let stdout = Command::new("./scripts/a.sh")
+fn run<S: AsRef<ffi::OsStr> + ?Sized>(s: &S) -> io::Result<Box<dyn io::BufRead>> {
+    let stdout = Command::new(s)
         .stdout(Stdio::piped())
         .spawn()?
         .stdout
-        .ok_or_else(|| Error::new(ErrorKind::Other,"Could not capture standard output."))?;
+        .ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                "Could not capture standard output."
+            )
+        })?;
 
-    let reader = BufReader::new(stdout);
+    Ok(Box::new(BufReader::new(stdout)))
+}
 
-    reader
+fn main() -> Result<(), io::Error> {
+    let reader = run("./scripts/a.sh");
+    reader?
         .lines()
         .filter_map(|line| line.ok())
-        .filter(|line| line.find("a").is_some())
         .for_each(|line| println!("{}", line));
 
-     Ok(())
+    Ok(())
+
 }
