@@ -1,6 +1,5 @@
 use std::process::{
     Command,
-    Child,
     Stdio,
 };
 use std::{
@@ -8,12 +7,9 @@ use std::{
     io::{
         BufRead,
         BufReader,
-        Read,
         BufWriter,
         Write,
     },
-    slice,
-    ffi,
 };
 
 struct Program {
@@ -58,11 +54,11 @@ impl Program {
 
     fn act(&mut self, input: String) -> io::Result<String> {
         println!("act({})", input);
-        self.writer.write_all(input.as_bytes());
+        self.writer.write_all(input.as_bytes())?;
         println!("wrote");
 
         let mut output = String::new();
-        self.reader.read_line(&mut output);
+        self.reader.read_line(&mut output)?;
         println!("read");
 
         Ok(output)
@@ -74,8 +70,6 @@ fn main() -> Result<(), io::Error> {
 
     loop {
         println!(".");
-        program.act("something new\n".to_string());
+        program.act("something new\n".to_string())?;
     }
-
-    Ok(())
 }
