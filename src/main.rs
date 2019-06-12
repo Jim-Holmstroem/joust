@@ -19,8 +19,8 @@ use tokio::{
 };
 
 struct Program {
-    reader: Box<dyn BufRead>,
-    writer: Box<dyn Write>,
+    reader: Box<dyn BufRead + Send>,
+    writer: Box<dyn Write + Send>,
 }
 
 impl Program {
@@ -78,6 +78,7 @@ impl Program {
 fn main() -> Result<(), io::Error> {
     let mut p = Program::new("./scripts/a.sh".to_string())?;
 
+    // TODO stream::unfold?
     loop {
         println!(
             "{}",
