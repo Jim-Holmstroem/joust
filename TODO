@@ -1,0 +1,3 @@
+* Have 2 threads, one with 1s timeout and one with read
+* select! (perhaps from crossbeam) to get the first signal from either timeout or read
+* if timeout then send signal to process to turn it off and read will automatically return read=0 or error (doesn't matter)
