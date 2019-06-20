@@ -10,12 +10,21 @@ use std::{
         BufWriter,
         Write,
     },
+    thread,
+    time::{
+        Duration,
+    },
 };
 
-extern crate tokio;
+use futures::future;
 
-use tokio::{
-    prelude::*,
+extern crate crossbeam;
+
+use crossbeam::{
+    select,
+    crossbeam_channel::{
+        unbounded,
+    },
 };
 
 struct Program {
@@ -62,16 +71,20 @@ impl Program {
         self.writer.write_all(input.as_bytes())?;
         self.writer.flush()?;
 
-        let mut output = String::new();
-        let read = future::lazy(|| {
-            self.reader.read_line(&mut output);
+        let (s, r) = unbounded();
 
-            future::ok::<_, ()>(())
+        let mut output = String::new();
+        thread::spawn(move || {
+            s.send(self.reader.read_line(&mut output)).unwrap();
+            //s.send(output).unwrap();
         });
 
-        tokio::run(read);
+        select!{
+            recv(r) -> msg => panic!(),
+            default(Duration::from_millis(500)) => println!("timed out"),
+        }
 
-        Ok(output)
+        Ok("".to_string())
     }
 }
 
